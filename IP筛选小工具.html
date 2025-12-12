@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>IP 筛选查询小工具</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding:18px; background:#f6f8fb; color:#0b1220; }
+    h1 { margin:0 0 8px 0; font-size:20px; }
+    .controls { margin:12px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    button { padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+    input[type=text] { padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0; }
+    textarea, pre { width:100%; box-sizing:border-box; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
+    textarea { height:120px; padding:10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; }
+    pre { padding:12px; background:#0b1220; color:#e6eef8; border-radius:6px; max-height:460px; overflow:auto; }
+    .small { font-size:13px; color:#475569; }
+    label { display:flex; gap:8px; align-items:center; }
+    .rowcount { margin-top:8px; font-weight:600; }
+  </style>
+</head>
+<body>
+  <h1>IP 筛选 & proxynova 批量查询工具</h1>
+  <div class="small">流程：拉取 raw → 筛含 <code>,CN,</code> 的行 → 格式化 → 批量请求 proxynova → 拼接输出（含 region+行号、城市中文、原始组织信息）</div>
+
+  <div class="controls">
+    <button id="runBtn">运行处理</button>
+    <button id="copyBtn">复制输出</button>
+    <button id="downloadBtn">下载 txt</button>
+    <label>Raw URL:
+      <input type="text" id="rawUrl" style="width:520px"
+             value="https://raw.githubusercontent.com/papapapapdelesia/Emilia/main/Data/alive.txt">
+    </label>
+    <label>proxynova API:
+      <input type="text" id="apiBase" style="width:360px" value="https://api.proxynova.com/v1/geolocation/bulk?ip=">
+    </label>
+  </div>
+
+  <div id="status">状态：待运行</div>
+  <div class="rowcount" id="countDisplay"></div>
+
+  <h3>筛出的包含 <code>,CN,</code> 的原始行（前 300 行）</h3>
+  <textarea id="cnLines" readonly placeholder="运行后显示"></textarea>
+
+  <h3>最终格式化输出（每行一条）</h3>
+  <pre id="output">（运行后显示）</pre>
+
+<script>
+(async () => {
+  const runBtn = document.getElementById('runBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const rawUrlInput = document.getElementById('rawUrl');
+  const apiBaseInput = document.getElementById('apiBase');
+  const statusEl = document.getElementById('status');
+  const cnLinesArea = document.getElementById('cnLines');
+  const outputPre = document.getElementById('output');
+  const countDisplay = document.getElementById('countDisplay');
+
+  function setStatus(t){ statusEl.textContent = '状态：' + t; }
+
+  // 简单城市翻译字典（可按需扩展）
+  const cityzh = {
+    "Beijing":"北京","Shanghai":"上海","Shenzhen":"深圳","Guangzhou":"广州","Chengdu":"成都",
+    "Hangzhou":"杭州","Nanjing":"南京","Wuhan":"武汉","Xi'an":"西安","Xian":"西安",
+    "Chongqing":"重庆","Suzhou":"苏州","Tianjin":"天津","Shenyang":"沈阳","Qingdao":"青岛",
+    "Zhengzhou":"郑州","Dongguan":"东莞","Fuzhou":"福州","Ningbo":"宁波","Kunming":"昆明",
+    "Changsha":"长沙","Harbin":"哈尔滨","Dalian":"大连","Jinan":"济南","Shijiazhuang":"石家庄",
+    "Haikou":"海口","Urumqi":"乌鲁木齐","Hefei":"合肥","Taiyuan":"太原","Nanning":"南宁",
+    "Sanya":"三亚"
+  };
+
+  function translateCity(en){
+    if(!en) return '';
+    if(cityzh[en]) return cityzh[en];
+    // 部分匹配
+    for(const k of Object.keys(cityzh)) if(en.toLowerCase().includes(k.toLowerCase())) return cityzh[k];
+    return en;
+  }
+
+  copyBtn.addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(outputPre.textContent || '');
+      alert('已复制输出到剪贴板');
+    }catch(e){ alert('复制失败：' + e.message); }
+  });
+
+  downloadBtn.addEventListener('click', ()=>{
+    const blob = new Blob([outputPre.textContent || ''], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'ip_filter_result.txt';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+
+  runBtn.addEventListener('click', async ()=>{
+    outputPre.textContent = ''; cnLinesArea.value = ''; countDisplay.textContent = '';
+    setStatus('开始拉取 raw 文本...');
+    const rawUrl = rawUrlInput.value.trim();
+    const apiBase = apiBaseInput.value.trim();
+    let rawText = '';
+    try {
+      const r = await fetch(rawUrl);
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      rawText = await r.text();
+    } catch (err) {
+      setStatus('拉取 raw 失败');
+      outputPre.textContent = '错误：无法拉取 raw 文本。\n' + err;
+      return;
+    }
+    setStatus('已拉取 raw，开始筛选包含 ",CN," 的行...');
+    const lines = rawText.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.length>0);
+    // 严格包含 ",CN,"（两侧逗号）
+    const cnLines = lines.filter(l => l.indexOf(',CN,') !== -1);
+    cnLinesArea.value = cnLines.slice(0,300).join('\n') + (cnLines.length>300? '\n\n...（仅显示前300行）':'');
+    if(cnLines.length === 0){
+      setStatus('未找到包含 ",CN," 的行');
+      outputPre.textContent = '未找到包含 ",CN," 的行';
+      return;
+    }
+    setStatus(`找到 ${cnLines.length} 条 CN 行，开始解析 ip/port 与原始组织信息...`);
+
+    // 解析：寻找第一个 ",CN," 的位置，前面为 "ip,port"，后面为 org tail
+    const entries = []; // {ip,port,orgRaw,rawLine}
+    for(const ln of cnLines){
+      const pos = ln.indexOf(',CN,');
+      if(pos === -1) continue;
+      const prefix = ln.slice(0,pos); // ip,port
+      const tail = ln.slice(pos + 4).trim(); // 原始 CN 后的组织等
+      const pp = prefix.split(',');
+      if(pp.length < 2) continue;
+      const ip = pp[0].trim();
+      const port = pp[1].trim();
+      if(!ip) continue;
+      entries.push({ip, port, orgRaw: tail, rawLine: ln});
+    }
+
+    if(entries.length === 0){
+      setStatus('解析后没有有效 ip:port 条目');
+      outputPre.textContent = '解析后没有有效 ip:port 条目';
+      return;
+    }
+
+    // 拆分并生成 IP 列表（不含端口）用于批量查询
+    const ips = entries.map(e => e.ip);
+    // 为避免太长 URL，分批查询 proxynova（每批 size 个 IP）
+    const batchSize = 120; // 可以调整（URL 长度限制）
+    const batches = [];
+    for(let i=0;i<ips.length;i+=batchSize) batches.push(ips.slice(i, i+batchSize));
+
+    setStatus(`将对 ${batches.length} 个批次调用 proxynova（每批最多 ${batchSize} 个 IP），请等待...`);
+    outputPre.textContent = '正在调用 proxynova API（可能被 CORS 限制）...\n\n';
+
+    // 收集返回
+    const geoMap = new Map(); // ip -> geo object
+    let fetchError = null;
+    for(let bi=0; bi<batches.length; bi++){
+      const batch = batches[bi];
+      const url = apiBase + encodeURIComponent(batch.join(','));
+      outputPre.textContent += `请求 ${bi+1}/${batches.length}： ${url}\n`;
+      try{
+        const resp = await fetch(url);
+        if(!resp.ok) {
+          // 尝试读取文本以便调试
+          const t = await resp.text().catch(()=>'<no body>');
+          throw new Error('proxynova 返回 HTTP ' + resp.status + '，body: ' + t);
+        }
+        const j = await resp.json();
+        if(j && Array.isArray(j.data)){
+          for(const d of j.data){
+            if(d && d.ip) geoMap.set(d.ip, d);
+          }
+        }
+      }catch(err){
+        fetchError = err;
+        console.error('proxynova 批量请求错误：', err);
+        outputPre.textContent += `错误：第 ${bi+1} 批请求失败： ${err.message}\n`;
+        // 不中断：继续尝试下一批
+      }
+      // small delay to be gentle (可去掉)
+      await new Promise(r=>setTimeout(r, 200));
+    }
+
+    if(fetchError){
+      outputPre.textContent += '\n注意：proxynova 请求过程中出现错误（可能是 CORS 或 API 限制）。若你在页面控制台看到 CORS，请改用服务器代理。继续用已有返回生成结果（若无返回则为未知）。\n\n';
+    }
+
+    setStatus('开始按要求拼接最终输出（region+行号、城市中文、原始组织信息）...');
+    const outLines = [];
+    for(let i=0;i<entries.length;i++){
+      const idx = i + 1; // 行号从1开始
+      const e = entries[i];
+      const ip = e.ip;
+      const port = e.port;
+      const tailOrg = e.orgRaw || '';
+      const geo = geoMap.get(ip);
+      // region: 如果有 region 且非空 -> 大写，否则 'CN'
+      const regionRaw = (geo && geo.region) ? String(geo.region).toUpperCase() : 'CN';
+      // 城市：优先 geo.city 翻译为中文；若无则 '未知'
+      const cityEn = (geo && geo.city) ? String(geo.city) : '';
+      const cityZh = cityEn ? translateCity(cityEn) : '';
+      // cityDisplay: 如果有 cityZh 则 cityZh + '中转' ; 否则 '未知中转'
+      const cityDisplay = cityZh ? (cityZh + '中转') : (cityEn ? (cityEn + '中转') : '未知中转');
+      // final: IP:port#REGION+行号 + 空格 + cityDisplay + 空格 + 原始组织（若无且 geo 缺失，则省略 org）
+      const final = `${ip}:${port}#${regionRaw}${idx} ${cityDisplay}${tailOrg ? (' ' + tailOrg) : ''}`;
+      outLines.push(final);
+    }
+
+    outputPre.textContent += '\n---- 输出结果 ----\n\n' + outLines.join('\n') + '\n\n';
+    countDisplay.textContent = `共输出 ${outLines.length} 个节点`;
+    setStatus('处理完成');
+  });
+
+})();
+</script>
+</body>
+</html>
