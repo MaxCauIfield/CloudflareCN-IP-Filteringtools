@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP 节点筛选工具 (暂停功能+CN修正版)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #f59e0b; /* 暂停颜色 */
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        /* 顶部配置栏 */
+        .top-panel {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #64748b; }
+        .form-group input { 
+            padding: 8px; 
+            border: 1px solid var(--border); 
+            border-radius: 4px; 
+            font-size: 0.9rem;
+        }
+
+        /* 按钮组 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; background: #94a3b8 !important; }
+
+        #startBtn { background: var(--primary); }
+        #pauseBtn { background: var(--warning); display: none; } /* 默认隐藏 */
+        #stopBtn { background: var(--danger); display: none; }
+        #downloadBtn { background: var(--success); }
+
+        /* 进度条 */
+        .progress-wrapper {
+            flex-grow: 1;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-left: 15px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            top: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 15px;
+            flex-grow: 1;
+            overflow: hidden; /* 防止撑开 body */
+        }
+
+        .panel {
+            background: var(--card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 10px;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #1e293b;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+        .log-item { margin-bottom: 4px; line-height: 1.4; color: #cbd5e1; border-bottom: 1px dashed #334155; }
+        .log-info { color: #60a5fa; }
+        .log-cn { color: #fcd34d; }
+        .log-err { color: #f87171; }
+        .log-sys { color: #94a3b8; font-style: italic; }
+
+        textarea {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            resize: none;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌍 IP 节点筛选工具 (Fix: CN Region & Pause)</h1>
+
+    <div class="top-panel">
+        <div class="config-grid">
+            <div class="form-group">
+                <label>Raw 源地址</label>
+                <input type="text" id="rawUrl" value="https://raw.githubusercontent.com/papapapapdelesia/Emilia/main/Data/alive.txt">
+            </div>
+            <div class="form-group">
+                <label>API 地址</label>
+                <input type="text" id="apiUrl" value="https://api.proxynova.com/v1/geolocation/bulk?ip=">
+            </div>
+            <div class="form-group">
+                <label>每批数量</label>
+                <input type="number" id="batchSize" value="40" min="1" max="100">
+            </div>
+            <div class="form-group">
+                <label>并发延迟 (ms)</label>
+                <input type="number" id="delayMs" value="350" min="100">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="startBtn" onclick="startProcess()">开始处理</button>
+            <button id="pauseBtn" onclick="togglePause()">暂停</button>
+            <button id="downloadBtn" onclick="downloadFile()" disabled>下载结果</button>
+            
+            <div class="progress-wrapper">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="panel">
+            <div class="panel-header">
+                <span>运行日志</span>
+                <span id="statusTag">就绪</span>
+            </div>
+            <div class="log-box" id="logArea"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <span>筛选结果 (实时)</span>
+                <span>行数: <span id="lineCount">0</span></span>
+            </div>
+            <textarea id="resultArea" placeholder="等待处理..."></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================= 配置与字典 =================
+
+    // 中国省份/直辖市映射表 (包含代码、中文名、常见的英文变体)
+    // 键名全部小写以方便匹配
+    const cnMap = {
+        // --- 华东 ---
+        "shanghai": { c: "SH", n: "上海" }, "sh": { c: "SH", n: "上海" }, "31": { c: "SH", n: "上海" },
+        "jiangsu": { c: "JS", n: "江苏" }, "js": { c: "JS", n: "江苏" }, "nanjing": { c: "JS", n: "江苏" }, "suzhou": { c: "JS", n: "江苏" },
+        "zhejiang": { c: "ZJ", n: "浙江" }, "zj": { c: "ZJ", n: "浙江" }, "hangzhou": { c: "ZJ", n: "浙江" },
+        "anhui": { c: "AH", n: "安徽" }, "ah": { c: "AH", n: "安徽" }, "hefei": { c: "AH", n: "安徽" },
+        "fujian": { c: "FJ", n: "福建" }, "fj": { c: "FJ", n: "福建" }, "fuzhou": { c: "FJ", n: "福建" }, "xiamen": { c: "FJ", n: "福建" },
+        "jiangxi": { c: "JX", n: "江西" }, "jx": { c: "JX", n: "江西" },
+        "shandong": { c: "SD", n: "山东" }, "sd": { c: "SD", n: "山东" }, "qingdao": { c: "SD", n: "山东" }, "jinan": { c: "SD", n: "山东" },
+        
+        // --- 华北 ---
+        "beijing": { c: "BJ", n: "北京" }, "bj": { c: "BJ", n: "北京" }, "11": { c: "BJ", n: "北京" },
+        "tianjin": { c: "TJ", n: "天津" }, "tj": { c: "TJ", n: "天津" }, "12": { c: "TJ", n: "天津" },
+        "hebei": { c: "HE", n: "河北" }, "he": { c: "HE", n: "河北" },
+        "shanxi": { c: "SX", n: "山西" }, "sx": { c: "SX", n: "山西" },
+        "inner mongolia": { c: "NM", n: "内蒙古" }, "neimenggu": { c: "NM", n: "内蒙古" }, "nm": { c: "NM", n: "内蒙古" },
+
+        // --- 华南 ---
+        "guangdong": { c: "GD", n: "广东" }, "gd": { c: "GD", n: "广东" }, "44": { c: "GD", n: "广东" }, 
+        "guangzhou": { c: "GD", n: "广东" }, "shenzhen": { c: "GD", n: "广东" }, // 深圳暂时归为广东代码，但名字可以特判
+        "guangxi": { c: "GX", n: "广西" }, "gx": { c: "GX", n: "广西" },
+        "hainan": { c: "HI", n: "海南" }, "hi": { c: "HI", n: "海南" },
+        "hong kong": { c: "HK", n: "香港" }, "hk": { c: "HK", n: "香港" },
+        "macau": { c: "MO", n: "澳门" }, "mo": { c: "MO", n: "澳门" },
+
+        // --- 华中 ---
+        "henan": { c: "HA", n: "河南" }, "ha": { c: "HA", n: "河南" },
+        "hubei": { c: "HB", n: "湖北" }, "hb": { c: "HB", n: "湖北" }, "wuhan": { c: "HB", n: "湖北" },
+        "hunan": { c: "HN", n: "湖南" }, "hn": { c: "HN", n: "湖南" }, "changsha": { c: "HN", n: "湖南" },
+
+        // --- 西南 ---
+        "chongqing": { c: "CQ", n: "重庆" }, "cq": { c: "CQ", n: "重庆" }, "50": { c: "CQ", n: "重庆" },
+        "sichuan": { c: "SC", n: "四川" }, "sc": { c: "SC", n: "四川" }, "chengdu": { c: "SC", n: "四川" },
+        "guizhou": { c: "GZ", n: "贵州" }, "gz": { c: "GZ", n: "贵州" }, 
+        "yunnan": { c: "YN", n: "云南" }, "yn": { c: "YN", n: "云南" },
+        "tibet": { c: "XZ", n: "西藏" }, "xizang": { c: "XZ", n: "西藏" }, "xz": { c: "XZ", n: "西藏" },
+
+        // --- 西北 ---
+        "shaanxi": { c: "SN", n: "陕西" }, "sn": { c: "SN", n: "陕西" }, "xi'an": { c: "SN", n: "陕西" },
+        "gansu": { c: "GS", n: "甘肃" }, "gs": { c: "GS", n: "甘肃" },
+        "qinghai": { c: "QH", n: "青海" }, "qh": { c: "QH", n: "青海" },
+        "ningxia": { c: "NX", n: "宁夏" }, "nx": { c: "NX", n: "宁夏" },
+        "xinjiang": { c: "XJ", n: "新疆" }, "xj": { c: "XJ", n: "新疆" },
+
+        // --- 台湾 ---
+        "taiwan": { c: "TW", n: "台湾" }, "tw": { c: "TW", n: "台湾" }, "taipei": { c: "TW", n: "台湾" }
+    };
+
+    // 全球国家代码 -> 中文
+    const countryMap = {
+        "CN": "中国", "US": "美国", "HK": "香港", "JP": "日本", "KR": "韩国", "SG": "新加坡", 
+        "TW": "台湾", "GB": "英国", "DE": "德国", "NL": "荷兰", "RU": "俄罗斯", "FR": "法国",
+        "CA": "加拿大", "AU": "澳大利亚", "TH": "泰国", "VN": "越南", "ID": "印尼", "IN": "印度",
+        "PH": "菲律宾", "MY": "马来西亚", "BR": "巴西", "IT": "意大利", "ES": "西班牙",
+        "SE": "瑞典", "CH": "瑞士", "TR": "土耳其", "ZA": "南非", "PL": "波兰", "IR": "伊朗",
+        "UA": "乌克兰", "AE": "阿联酋", "MO": "澳门", "AR": "阿根廷", "KZ": "哈萨克斯坦"
+    };
+
+    // ================= 全局变量 =================
+    let isProcessing = false;
+    let isPaused = false;
+    let results = []; // 存储最终结果文本
+
+    // ================= 工具函数 =================
+    
+    function log(msg, type='sys') {
+        const box = document.getElementById('logArea');
+        const d = new Date();
+        const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+        box.innerHTML += `<div class="log-item log-${type}">[${time}] ${msg}</div>`;
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // 关键修复：CN 地区识别
+    function getCNInfo(apiInfo, entryAsn) {
+        // apiInfo 包含: region_code, region_name, city, region 等字段（视 API 而定）
+        // entryAsn 是 RAW 数据里的 ASN 字符串
+        
+        let foundCode = "";
+        let foundName = "";
+
+        // 1. 数据清洗：收集所有可能包含地理信息的字段
+        // 注意：API 返回的键名可能不统一，全部尝试获取
+        const clues = [
+            apiInfo.region_code,           // 最准确：如 "GD", "44"
+            apiInfo.region,                // 名称：Guangdong
+            apiInfo.region_name,           // 名称变体
+            apiInfo.principalSubdivision,  // 某些API使用此字段
+            apiInfo.city                   // 城市：Shenzhen
+        ].filter(Boolean).map(s => String(s).trim().toLowerCase());
+
+        // 2. 遍历 API 线索匹配字典
+        for (let clue of clues) {
+            // 去除干扰词
+            let clean = clue.replace(/province|city|region|autonomous/g, '').trim();
+            if (cnMap[clean]) {
+                foundCode = cnMap[clean].c;
+                foundName = cnMap[clean].n;
+                
+                // 特殊处理：如果是深圳，代码用 GD，但名字显示深圳
+                if (clean.includes('shenzhen')) foundName = "深圳";
+                if (clean.includes('beijing')) foundName = "北京";
+                if (clean.includes('shanghai')) foundName = "上海";
+                
+                break; // 找到即止
+            }
+        }
+
+        // 3. 如果 API 没找到，扫描 ASN 文本 (Fallback)
+        if (!foundCode && entryAsn) {
+            const asnLower = entryAsn.toLowerCase();
+            for (let key in cnMap) {
+                // 跳过短 key 避免误判 (如 'he', 'hi')，除非明确是省份全拼
+                if (key.length < 3 && key !== 'bj' && key !== 'sh') continue;
+                
+                if (asnLower.includes(key)) {
+                    foundCode = cnMap[key].c;
+                    foundName = cnMap[key].n;
+                    if (key.includes('shenzhen')) foundName = "深圳";
+                    break;
+                }
+            }
+        }
+
+        // 4. 最终兜底
+        if (!foundCode) {
+            return { codeStr: "CN", nameStr: "中国" }; // 无法识别具体省份，只显示 CN 和 中国
+        }
+
+        return { codeStr: "CN" + foundCode, nameStr: foundName };
+    }
+
+
+    // ================= 主逻辑 =================
+
+    async function startProcess() {
+        if (isProcessing) return;
+        
+        // 初始化 UI
+        isProcessing = true;
+        isPaused = false;
+        results = [];
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('pauseBtn').style.display = "inline-block";
+        document.getElementById('pauseBtn').textContent = "暂停";
+        document.getElementById('pauseBtn').disabled = false;
+        document.getElementById('downloadBtn').disabled = true;
+        document.getElementById('logArea').innerHTML = "";
+        document.getElementById('resultArea').value = "";
+        document.getElementById('statusTag').textContent = "运行中";
+        document.getElementById('statusTag').style.color = "var(--primary)";
+
+        const rawUrl = document.getElementById('rawUrl').value;
+        const apiUrlBase = document.getElementById('apiUrl').value;
+        const batchSize = parseInt(document.getElementById('batchSize').value) || 40;
+        const delayMs = parseInt(document.getElementById('delayMs').value) || 350;
+
+        try {
+            log("正在下载 Raw 数据...", "sys");
+            const res = await fetch(rawUrl);
+            if (!res.ok) throw new Error("Raw 数据下载失败: " + res.status);
+            const text = await res.text();
+            
+            // 解析 Raw
+            const lines = text.split('\n').map(l=>l.trim()).filter(l=>l);
+            const entries = [];
+            lines.forEach(l => {
+                const p = l.split(',');
+                if (p.length >= 4) {
+                    entries.push({
+                        ip: p[0].trim(),
+                        port: p[1].trim(),
+                        code: p[2].trim().toUpperCase(),
+                        asn: p.slice(3).join(',').trim()
+                    });
+                }
+            });
+
+            log(`解析完成，共 ${entries.length} 个 IP。开始 API 批量查询...`, "info");
+
+            // 批处理循环
+            for (let i = 0; i < entries.length; i += batchSize) {
+                
+                // --- 暂停逻辑 ---
+                while (isPaused) {
+                    document.getElementById('statusTag').textContent = "已暂停";
+                    document.getElementById('statusTag').style.color = "var(--warning)";
+                    await sleep(200);
+                }
+                document.getElementById('statusTag').textContent = "运行中";
+                document.getElementById('statusTag').style.color = "var(--primary)";
+                // ----------------
+
+                const batch = entries.slice(i, i + batchSize);
+                const ips = batch.map(e => e.ip).join(',');
+                const url = `${apiUrlBase}${ips}`;
+
+                try {
+                    // API 请求
+                    const apiRes = await fetch(url);
+                    let apiData = {};
+                    if (apiRes.ok) {
+                        const json = await apiRes.json();
+                        // 兼容 ProxyNova 返回格式 (有时是 array, 有时是 object map)
+                        if (Array.isArray(json)) {
+                            json.forEach(item => { if(item.ip) apiData[item.ip] = item; });
+                        } else {
+                            apiData = json;
+                        }
+                    } else {
+                        log(`Batch ${Math.floor(i/batchSize)+1} API 失败 (${apiRes.status})`, "err");
+                    }
+
+                    // 格式化输出
+                    batch.forEach(entry => {
+                        const info = apiData[entry.ip] || {};
+                        // 优先用 API 国家码，否则用 RAW
+                        const cCode = (info.country_code || entry.code).toUpperCase();
+                        
+                        let lineStr = "";
+
+                        if (cCode === 'CN') {
+                            // 调用增强的 CN 识别逻辑
+                            const cnInfo = getCNInfo(info, entry.asn);
+                            // 格式: 59.36.147.253:10011#CN3 深圳中转 CHINANET...
+                            lineStr = `${entry.ip}:${entry.port}#${cnInfo.codeStr} ${cnInfo.nameStr}中转 ${entry.asn}`;
+                            // log(`CN IP: ${cnInfo.nameStr} (${entry.ip})`, "cn");
+                        } else {
+                            // 非 CN 逻辑
+                            const cName = countryMap[cCode] || info.country_name || cCode;
+                            // 格式: 167.17.183.134:443#CH 德国直连 Baxet...
+                            lineStr = `${entry.ip}:${entry.port}#${cCode} ${cName}直连 ${entry.asn}`;
+                        }
+                        results.push(lineStr);
+                    });
+
+                    // 更新 UI
+                    const currentCount = Math.min(i + batchSize, entries.length);
+                    const percent = Math.floor((currentCount / entries.length) * 100);
+                    
+                    document.getElementById('progressBar').style.width = percent + "%";
+                    document.getElementById('progressText').innerText = percent + "%";
+                    document.getElementById('resultArea').value = results.join('\n');
+                    document.getElementById('resultArea').scrollTop = document.getElementById('resultArea').scrollHeight;
+                    document.getElementById('lineCount').textContent = results.length;
+
+                } catch (batchErr) {
+                    log(`批次处理异常: ${batchErr.message}`, "err");
+                    // 即使出错也保留原始数据
+                    batch.forEach(e => results.push(`${e.ip}:${e.port}#${e.code} 未知直连 ${e.asn}`));
+                }
+
+                // 延迟
+                if (i + batchSize < entries.length) await sleep(delayMs);
+            }
+
+            log("所有任务处理完成。", "info");
+            document.getElementById('downloadBtn').disabled = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').style.display = "none";
+            document.getElementById('statusTag').textContent = "完成";
+            document.getElementById('statusTag').style.color = "var(--success)";
+
+        } catch (e) {
+            log(`致命错误: ${e.message}`, "err");
+            document.getElementById('startBtn').disabled = false;
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    function togglePause() {
+        isPaused = !isPaused;
+        const btn = document.getElementById('pauseBtn');
+        if (isPaused) {
+            btn.textContent = "继续";
+            btn.style.background = "var(--success)";
+            log("用户已暂停", "sys");
+        } else {
+            btn.textContent = "暂停";
+            btn.style.background = "var(--warning)";
+            log("用户继续任务", "sys");
+        }
+    }
+
+    function downloadFile() {
+        const text = document.getElementById('resultArea').value;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `proxies_${new Date().toISOString().slice(0,10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
