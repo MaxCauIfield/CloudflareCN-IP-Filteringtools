@@ -1,5 +1,3 @@
----
-
 # CloudflareCN-IP-Filteringtools
 
 一个用于筛选、集成Cloudflare节点的IP工具，支持Cloudflareworker集成，快速处理节点仓库并灵活输出格式化IP信息。
@@ -176,8 +174,6 @@
 ### License
 
 MIT License / 可公开再利用
-
----
 
 > 如果需要HTML源代码，请在Issues请求或参考本项目HTML文件。
 
