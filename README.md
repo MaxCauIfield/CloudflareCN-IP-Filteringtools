@@ -1,5 +1,3 @@
-以下是格式化后的 **README.md** 文件。内容包含项目简介、功能说明、工作流程、API用法、详细prompt、以及使用说明。适用于GitHub标准自述。
-
 ---
 
 # CloudflareCN-IP-Filteringtools
