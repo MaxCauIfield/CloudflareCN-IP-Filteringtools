@@ -1,0 +1,63 @@
+{
+  "geoApi": {
+    "baseUrl": "http://ip-api.com/json",
+    "fallbackBaseUrls": [
+      "https://ipwho.is",
+      "https://ipapi.co"
+    ],
+    "lang": "zh-CN",
+    "minIntervalMs": 1500,
+    "timeoutMs": 8000,
+    "fields": "status,message,country,regionName,city,as,query"
+  },
+  "exitIpProviders": [
+    "http://icanhazip.com/",
+    "http://ifconfig.me/ip",
+    "http://ip-api.com/json/?fields=query",
+    "https://api.ipify.org?format=json"
+  ],
+  "mihomo": {
+    "binPath": "./.mihomo/mihomo",
+    "autoDownload": true,
+    "download": {
+      "repo": "MetaCubeX/mihomo",
+      "assetNameHints": ["linux", "amd64"],
+      "preferCompressed": true
+    },
+    "workDir": "./.mihomo",
+    "configPath": "./.mihomo/config.yaml",
+    "logPath": "./.mihomo/mihomo.log",
+    "mixedPort": 7890,
+    "externalController": "127.0.0.1:9090",
+    "secret": ""
+  },
+  "test": {
+    "delayTestUrl": "https://www.gstatic.com/generate_204",
+    "timeoutMs": 7000,
+    "maxConcurrency": 10,
+    "retries": 1,
+    "retryBackoffMs": 400
+  },
+  "web": {
+    "host": "127.0.0.1",
+    "port": 8787
+  },
+  "nodeTemplate": {
+    "type": "trojan",
+    "password": "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b",
+    "sni": "alde1.pages.dev",
+    "skipCertVerify": true,
+    "ech": {
+      "enable": true,
+      "queryServerName": "cloudflare-ech.com"
+    },
+    "network": "ws",
+    "ws": {
+      "path": "/library?ed=2560",
+      "headers": {
+        "Host": "alde1.pages.dev"
+      }
+    }
+  }
+}
+

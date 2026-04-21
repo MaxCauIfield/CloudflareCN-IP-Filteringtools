@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP筛选查询工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+            margin: 0 auto 30px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #555;
+            min-height: 24px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .result-container {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .node-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .copy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .result-text {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 IP筛选查询工具</h1>
+        
+        <button class="btn" id="startBtn" onclick="startProcess()">开始查询</button>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-header">
+                <div class="node-count" id="nodeCount">共 0 个节点</div>
+                <button class="copy-btn" onclick="copyResult()">复制结果</button>
+            </div>
+            <div class="result-text" id="resultText"></div>
+        </div>
+    </div>
+
+    <script>
+        // 城市名称翻译字典
+        const cityTranslations = {
+            'Beijing': '北京',
+            'Shanghai': '上海',
+            'Guangzhou': '广州',
+            'Shenzhen': '深圳',
+            'Chengdu': '成都',
+            'Hangzhou': '杭州',
+            'Wuhan': '武汉',
+            'Chongqing': '重庆',
+            'Tianjin': '天津',
+            'Nanjing': '南京',
+            'Xian': '西安',
+            'Suzhou': '苏州',
+            'Shenyang': '沈阳',
+            'Dongguan': '东莞',
+            'Dalian': '大连',
+            'Qingdao': '青岛',
+            'Jinan': '济南',
+            'Harbin': '哈尔滨',
+            'Zhengzhou': '郑州',
+            'Changsha': '长沙',
+            'Kunming': '昆明',
+            'Foshan': '佛山',
+            'Xiamen': '厦门',
+            'Hefei': '合肥',
+            'Fuzhou': '福州',
+            'Ningbo': '宁波',
+            'Shijiazhuang': '石家庄',
+            'Guiyang': '贵阳',
+            'Nanchang': '南昌',
+            'Changchun': '长春',
+            'Taiyuan': '太原',
+            'Nanning': '南宁',
+            'Wenzhou': '温州',
+            'Zhuhai': '珠海',
+            'Urumqi': '乌鲁木齐',
+            'Lanzhou': '兰州',
+            'Hohhot': '呼和浩特',
+            'Yinchuan': '银川',
+            'Haikou': '海口',
+            'Lhasa': '拉萨'
+        };
+
+        function updateStatus(message, isError = false) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = isError ? 'status error' : 'status success';
+        }
+
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = Math.round(percent) + '%';
+        }
+
+        function translateCity(cityName) {
+            if (!cityName) return '未知';
+            return cityTranslations[cityName] || cityName;
+        }
+
+        async function startProcess() {
+            const startBtn = document.getElementById('startBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            startBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            resultContainer.style.display = 'none';
+            updateProgress(0);
+            
+            try {
+                // 步骤1: 获取数据
+                updateStatus('正在获取数据...');
+                updateProgress(10);
+                
+                const response = await fetch('https://raw.githubusercontent.com/papapapapdelesia/Emilia/main/Data/alive.txt');
+                if (!response.ok) throw new Error('无法获取数据');
+                
+                const rawData = await response.text();
+                updateProgress(20);
+                
+                // 步骤2: 筛选包含",CN,"的行
+                updateStatus('正在筛选中国IP...');
+                const lines = rawData.split('\n').filter(line => line.includes(',CN,'));
+                updateProgress(30);
+                
+                if (lines.length === 0) {
+                    throw new Error('未找到中国IP');
+                }
+                
+                // 步骤3-5: 处理数据格式
+                updateStatus('正在格式化数据...');
+                const processedData = [];
+                const ipList = [];
+                const originalDescriptions = {};
+                
+                for (let line of lines) {
+                    // 提取IP和端口
+                    const parts = line.split(',CN,');
+                    if (parts.length < 2) continue;
+                    
+                    const ipPort = parts[0].replace(',', ':');
+                    const description = parts[1].trim();
+                    const ip = ipPort.split(':')[0];
+                    
+                    processedData.push(ipPort + '#');
+                    ipList.push(ip);
+                    originalDescriptions[ip] = description;
+                }
+                
+                updateProgress(40);
+                
+                // 步骤6: 批量查询IP地理位置
+                updateStatus('正在查询地理位置信息...');
+                
+                // 由于API可能有限制，我们分批查询
+                const batchSize = 50;
+                const allGeoData = {};
+                
+                for (let i = 0; i < ipList.length; i += batchSize) {
+                    const batch = ipList.slice(i, i + batchSize);
+                    const apiUrl = `https://api.proxynova.com/v1/geolocation/bulk?ip=${batch.join(',')}`;
+                    
+                    try {
+                        const geoResponse = await fetch(apiUrl);
+                        if (geoResponse.ok) {
+                            const geoData = await geoResponse.json();
+                            if (geoData.data) {
+                                geoData.data.forEach(item => {
+                                    allGeoData[item.ip] = item;
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('批次查询失败:', e);
+                    }
+                    
+                    updateProgress(40 + (i / ipList.length) * 40);
+                    
+                    // 添加延迟避免API限制
+                    if (i + batchSize < ipList.length) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+                
+                updateProgress(80);
+                
+                // 步骤7: 格式化输出
+                updateStatus('正在生成结果...');
+                const finalResults = [];
+                
+                processedData.forEach((item, index) => {
+                    const ipPort = item.replace('#', '');
+                    const ip = ipPort.split(':')[0];
+                    const geoInfo = allGeoData[ip];
+                    
+                    let region = 'CN';
+                    let city = '未知';
+                    
+                    if (geoInfo) {
+                        region = geoInfo.region || 'CN';
+                        city = translateCity(geoInfo.city);
+                    }
+                    
+                    const lineNumber = index + 1;
+                    const description = originalDescriptions[ip] || '';
+                    
+                    let result = `${ipPort}#${region}${lineNumber} ${city}中转`;
+                    if (description) {
+                        result += ` ${description}`;
+                    }
+                    
+                    finalResults.push(result);
+                });
+                
+                updateProgress(100);
+                
+                // 显示结果
+                updateStatus('查询完成！', false);
+                document.getElementById('nodeCount').textContent = `共 ${finalResults.length} 个节点`;
+                document.getElementById('resultText').textContent = finalResults.join('\n');
+                resultContainer.style.display = 'block';
+                
+            } catch (error) {
+                updateStatus('错误: ' + error.message, true);
+                console.error(error);
+            } finally {
+                startBtn.disabled = false;
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function copyResult() {
+            const resultText = document.getElementById('resultText').textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ 已复制';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败，请手动复制');
+            });
+        }
+    </script>
+</body>
+</html>
