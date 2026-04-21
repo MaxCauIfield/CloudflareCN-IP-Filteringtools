@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IP → Mihomo 节点测速筛选</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif; margin: 18px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      textarea { width: 100%; min-height: 220px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      pre { white-space: pre-wrap; word-break: break-word; background: rgba(127,127,127,.12); padding: 10px; border-radius: 8px; min-height: 120px; }
+      input[type="number"] { width: 110px; }
+      .card { border: 1px solid rgba(127,127,127,.3); border-radius: 10px; padding: 12px; }
+      .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      button { padding: 8px 12px; cursor: pointer; }
+      .muted { opacity: .8; font-size: 12px; }
+      .kv { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .kv label { display: inline-flex; gap: 6px; align-items: center; }
+      .ok { color: #067d17; }
+      .bad { color: #b42318; }
+    </style>
+  </head>
+  <body>
+    <h2>IP → 节点测速筛选（WebUI）</h2>
+    <div class="muted">所有操作在浏览器完成：粘贴 FOFA → 保存配置 → 并发测速/剔除 timeout → 探测落地 IP → 输出结果。</div>
+
+    <div class="row" style="margin-top: 12px;">
+      <div class="card">
+        <h3>1) 粘贴 FOFA 文本</h3>
+        <textarea id="fofaText" placeholder="把 FOFA 复制的表格文本粘贴到这里..."></textarea>
+        <div class="muted">会自动提取并去重所有 IP:端口。</div>
+      </div>
+
+      <div class="card">
+        <h3>2) 配置（config.json）</h3>
+        <div class="actions">
+          <button id="btnLoadCfg">加载配置</button>
+          <button id="btnSaveCfg">保存配置</button>
+          <span id="cfgStatus" class="muted"></span>
+        </div>
+        <textarea id="configJson" placeholder="config.json 内容（JSON）"></textarea>
+        <div class="muted">提示：并发/重试也可在下面临时覆盖（不会自动写回配置）。</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 12px;">
+      <h3>3) 测试参数（临时覆盖）</h3>
+      <div class="kv">
+        <label>最大并发 <input id="maxConcurrency" type="number" min="1" value="10" /></label>
+        <label>重试次数 <input id="retries" type="number" min="0" value="1" /></label>
+        <label>重试退避(ms) <input id="retryBackoffMs" type="number" min="0" value="400" /></label>
+        <label>delay timeout(ms) <input id="timeoutMs" type="number" min="1000" value="7000" /></label>
+        <button id="btnStart">开始任务</button>
+        <button id="btnDiag">一键诊断</button>
+        <span id="jobStatus" class="muted"></span>
+      </div>
+      <div class="muted">失败原因会分类统计（timeout/auth/network/invalid_response/…）。</div>
+    </div>
+
+    <div class="row" style="margin-top: 12px;">
+      <div class="card">
+        <h3>进度 & 日志</h3>
+        <div id="progressText" class="muted"></div>
+        <pre id="logs"></pre>
+      </div>
+      <div class="card">
+        <h3>结果输出</h3>
+        <div class="actions">
+          <button id="btnCopy">复制结果</button>
+          <button id="btnDownload">下载 results.txt</button>
+        </div>
+        <pre id="results"></pre>
+        <div class="muted" id="summary"></div>
+      </div>
+    </div>
+
+    <script src="/ui.js"></script>
+  </body>
+</html>
+
