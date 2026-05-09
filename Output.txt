@@ -1,7 +1,0 @@
-119.236.89.29:33890#新加坡Southeast1 Banyan Garden中转 PCCW IMS Limited
-117.30.205.234:2053#美国加州圣何西2 厦门中转 Chinanet FJ
-222.167.202.5:7443#意大利伦巴第加拉拉泰3 香港中转 Private Customer
-222.167.202.18:7443#瑞典Stockholm County4 香港中转 Private Customer
-222.167.202.20:7443#意大利伦巴第加拉拉泰5 香港中转 Private Customer
-222.167.202.11:7443#意大利伦巴第加拉拉泰6 香港中转 Private Customer
-222.167.202.23:7443#意大利伦巴第加拉拉泰7 香港中转 Private Customer
