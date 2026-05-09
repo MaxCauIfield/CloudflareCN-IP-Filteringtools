@@ -6,6 +6,7 @@ const path = require("node:path");
 const { parseFofaToIpPorts } = require("./fofa");
 const { loadConfig } = require("./config");
 const { runFullPipeline } = require("./runner");
+const { mergeOutputDedupe } = require("./outputStore");
 
 function printHelp() {
   console.log(`
@@ -84,6 +85,13 @@ async function main(args) {
 
   console.log("\n==== 结果 ====");
   console.log(result.lines.join("\n"));
+
+  try {
+    await mergeOutputDedupe(process.cwd(), result.lines);
+    console.log(`\n已写入/合并历史：${path.resolve(process.cwd(), "Output.txt")}`);
+  } catch (e) {
+    console.error(`写入 Output.txt 失败：${String(e?.message || e)}`);
+  }
 }
 
 async function runCli(args) {

@@ -7,8 +7,10 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { loadConfig } = require("../config");
 const { runFullPipeline } = require("../runner");
+const { mergeOutputDedupe, DEFAULT_OUTPUT_FILENAME } = require("../outputStore");
 
 const CONFIG_PATH = path.resolve(process.cwd(), "config.json");
+const OUTPUT_PATH = path.resolve(process.cwd(), DEFAULT_OUTPUT_FILENAME);
 
 function json(res, status, obj) {
   const body = Buffer.from(JSON.stringify(obj));
@@ -79,7 +81,8 @@ function createJobState({ id }) {
     createdAt: nowIso(),
     updatedAt: nowIso(),
     stage: "queued",
-    progress: { done: 0, total: 0 },
+    // progress 既可表示“步骤进度”（step/total），也可表示“条目进度”（done/total）
+    progress: { done: 0, total: 0, step: 0, stepName: "", detail: "" },
     logs: [],
     status: "running", // running | done | error
     error: null,
@@ -114,6 +117,24 @@ async function startWebServer() {
       if (req.method === "GET" && url.pathname === "/ui.js") {
         const js = await fs.readFile(path.resolve(__dirname, "ui.js"), "utf8");
         return text(res, 200, js, "text/javascript; charset=utf-8");
+      }
+
+      // 历史输出 Output.txt
+      if (req.method === "GET" && url.pathname === "/api/output") {
+        try {
+          const text = await fs.readFile(OUTPUT_PATH, "utf8");
+          return json(res, 200, { path: OUTPUT_PATH, text });
+        } catch {
+          return json(res, 200, { path: OUTPUT_PATH, text: "" });
+        }
+      }
+      if (req.method === "PUT" && url.pathname === "/api/output") {
+        const body = await readBody(req);
+        const payload = safeParseJson(body.toString("utf8"));
+        const text = payload && typeof payload.text === "string" ? payload.text : null;
+        if (text == null) return json(res, 400, { error: "invalid_payload", need: { text: "string" } });
+        await fs.writeFile(OUTPUT_PATH, text, "utf8");
+        return json(res, 200, { ok: true });
       }
 
       // 配置：读取
@@ -220,7 +241,7 @@ async function startWebServer() {
               },
               log: (s) => pushLog(job, s),
               onProgress: (p) => {
-                job.progress = p;
+                job.progress = { ...job.progress, ...p };
                 job.updatedAt = nowIso();
               }
             });
@@ -235,6 +256,14 @@ async function startWebServer() {
                 ok: r.ok?.length || 0
               }
             };
+            if (Array.isArray(r.lines) && r.lines.length > 0) {
+              try {
+                await mergeOutputDedupe(process.cwd(), r.lines);
+                pushLog(job, `已追加/去重写入：${OUTPUT_PATH}`);
+              } catch (e) {
+                pushLog(job, `写入 Output.txt 失败：${String(e?.message || e)}`);
+              }
+            }
             pushLog(job, `完成：parsed=${job.result.totals.parsed} ok=${job.result.totals.ok}`);
             job.updatedAt = nowIso();
           } catch (e) {

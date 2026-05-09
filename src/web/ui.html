@@ -6,41 +6,220 @@
     <title>IP → Mihomo 节点测速筛选</title>
     <style>
       :root { color-scheme: light dark; }
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif; margin: 18px; }
-      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      textarea { width: 100%; min-height: 220px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-      pre { white-space: pre-wrap; word-break: break-word; background: rgba(127,127,127,.12); padding: 10px; border-radius: 8px; min-height: 120px; }
-      input[type="number"] { width: 110px; }
-      .card { border: 1px solid rgba(127,127,127,.3); border-radius: 10px; padding: 12px; }
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+        margin: 0;
+        background: radial-gradient(1200px 600px at 20% 0%, rgba(64, 110, 255, .14), transparent),
+          radial-gradient(900px 500px at 80% 10%, rgba(0, 197, 167, .12), transparent);
+      }
+      .container { max-width: 1220px; margin: 0 auto; padding: 18px; min-width: 0; }
+      .topbar {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+        padding: 14px 16px; border-radius: 14px;
+        background: rgba(127,127,127,.08);
+        border: 1px solid rgba(127,127,127,.22);
+        backdrop-filter: blur(10px);
+        min-width: 0;
+      }
+      .topbar h2 { margin: 0; font-size: 18px; letter-spacing: .2px; }
+      .muted { opacity: .8; font-size: 12px; line-height: 1.5; }
+
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-width: 0; }
+      @media (max-width: 980px) { .row { grid-template-columns: 1fr; } }
+
+      .fieldBlock { min-width: 0; max-width: 100%; }
+      textarea {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        min-height: 220px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        border: 1px solid rgba(127,127,127,.25);
+        background: rgba(127,127,127,.06);
+        outline: none;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        resize: vertical;
+      }
+      textarea:focus { border-color: rgba(64,110,255,.55); box-shadow: 0 0 0 3px rgba(64,110,255,.15); }
+
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        background: rgba(127,127,127,.08);
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(127,127,127,.18);
+        min-height: 120px;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      input[type="number"], input[type="text"] {
+        max-width: 100%;
+        border-radius: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(127,127,127,.25);
+        background: rgba(127,127,127,.06);
+        outline: none;
+      }
+      input[type="number"] { width: 120px; }
+      input[type="text"] { width: min(240px, 100%); }
+      .inputGrow input[type="text"] { width: min(420px, 100%); }
+      .inputWide input[type="text"] { width: min(320px, 100%); }
+
+      .card {
+        border: 1px solid rgba(127,127,127,.22);
+        border-radius: 14px;
+        padding: 14px;
+        background: rgba(127,127,127,.06);
+        backdrop-filter: blur(10px);
+        min-width: 0;
+        overflow: hidden;
+      }
+      .card h3 { margin: 0 0 10px 0; font-size: 14px; }
       .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-      button { padding: 8px 12px; cursor: pointer; }
-      .muted { opacity: .8; font-size: 12px; }
-      .kv { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-      .kv label { display: inline-flex; gap: 6px; align-items: center; }
-      .ok { color: #067d17; }
-      .bad { color: #b42318; }
+
+      button {
+        padding: 9px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 1px solid rgba(127,127,127,.25);
+        background: rgba(127,127,127,.10);
+      }
+      button.primary {
+        border-color: rgba(64,110,255,.4);
+        background: linear-gradient(180deg, rgba(64,110,255,.25), rgba(64,110,255,.12));
+      }
+      button:hover { filter: brightness(1.05); }
+      button:disabled { opacity: .55; cursor: not-allowed; }
+
+      .kv { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-width: 0; }
+      .kv label { display: inline-flex; gap: 6px; align-items: center; min-width: 0; }
+
+      .progressWrap { display: grid; gap: 8px; min-width: 0; }
+      .progressBar {
+        height: 10px; border-radius: 999px;
+        background: rgba(127,127,127,.18);
+        overflow: hidden; border: 1px solid rgba(127,127,127,.22);
+        position: relative;
+      }
+      .progressFill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, rgba(64,110,255,.92), rgba(0,197,167,.92));
+        transition: width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 0 12px rgba(64,110,255,.35);
+      }
+      .progressShine {
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+        transform: translateX(-100%);
+        animation: shine 2.2s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes shine {
+        0% { transform: translateX(-100%); }
+        60% { transform: translateX(100%); }
+        100% { transform: translateX(100%); }
+      }
+      .badge { display: inline-flex; align-items: center; gap: 8px; }
+      .pill { padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(127,127,127,.24); background: rgba(127,127,127,.08); font-size: 12px; }
+
+      #worldMapSvg {
+        width: 100%;
+        height: auto;
+        max-height: 420px;
+        border-radius: 12px;
+        border: 1px solid rgba(127,127,127,.2);
+        background: #0a1628;
+      }
+      .mapLegend { font-size: 12px; opacity: .85; margin-top: 8px; }
+      .map-arc {
+        stroke-dasharray: 10 8;
+        animation: mapDash 3.2s linear infinite;
+      }
+      @keyframes mapDash {
+        to { stroke-dashoffset: -36; }
+      }
+      .map-dot {
+        animation: mapPulse 2.4s ease-in-out infinite;
+      }
+      @keyframes mapPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.55; }
+      }
     </style>
   </head>
   <body>
-    <h2>IP → 节点测速筛选（WebUI）</h2>
-    <div class="muted">所有操作在浏览器完成：粘贴 FOFA → 保存配置 → 并发测速/剔除 timeout → 探测落地 IP → 输出结果。</div>
+    <div class="container">
+      <div class="topbar">
+        <div>
+          <h2>IP → 节点测速筛选（WebUI）</h2>
+          <div class="muted">粘贴 FOFA → 去重提取 IP:端口 → 并发测速剔除 timeout → 探测落地 IP → 输出结果。</div>
+        </div>
+        <div class="badge">
+          <span class="pill" id="jobStatus"></span>
+          <span class="pill" id="cfgStatus"></span>
+        </div>
+      </div>
 
     <div class="row" style="margin-top: 12px;">
-      <div class="card">
+      <div class="card fieldBlock">
         <h3>1) 粘贴 FOFA 文本</h3>
         <textarea id="fofaText" placeholder="把 FOFA 复制的表格文本粘贴到这里..."></textarea>
         <div class="muted">会自动提取并去重所有 IP:端口。</div>
       </div>
 
-      <div class="card">
+      <div class="card fieldBlock">
         <h3>2) 配置（config.json）</h3>
         <div class="actions">
           <button id="btnLoadCfg">加载配置</button>
           <button id="btnSaveCfg">保存配置</button>
-          <span id="cfgStatus" class="muted"></span>
         </div>
         <textarea id="configJson" placeholder="config.json 内容（JSON）"></textarea>
         <div class="muted">提示：并发/重试也可在下面临时覆盖（不会自动写回配置）。</div>
+      </div>
+    </div>
+
+    <div class="card fieldBlock" style="margin-top: 12px;">
+      <h3>2.1) 节点订阅规则（可视化编辑：nodeTemplate）</h3>
+      <div class="muted">这里改动会同步写入 `config.json` 的 `nodeTemplate`。如果你需要更高级的规则，仍可直接编辑上面的 JSON。</div>
+      <div class="kv" style="margin-top: 10px;">
+        <label>类型 <input id="tpl_type" type="text" placeholder="trojan" /></label>
+        <label class="inputGrow">密码 <input id="tpl_password" type="text" placeholder="password" /></label>
+        <label>SNI <input id="tpl_sni" type="text" placeholder="alde1.pages.dev" /></label>
+        <label><input id="tpl_skipCertVerify" type="checkbox" /> skip-cert-verify</label>
+      </div>
+
+      <div class="kv" style="margin-top: 10px;">
+        <label>网络 <input id="tpl_network" type="text" placeholder="ws" /></label>
+        <label class="inputWide">WS Path <input id="tpl_ws_path" type="text" placeholder="/library?ed=2560" /></label>
+        <label>WS Host(Header) <input id="tpl_ws_host" type="text" placeholder="alde1.pages.dev" /></label>
+      </div>
+
+      <div class="kv" style="margin-top: 10px;">
+        <label><input id="tpl_ech_enable" type="checkbox" /> 启用 ECH</label>
+        <label>ECH Query SNI <input id="tpl_ech_query" type="text" placeholder="cloudflare-ech.com" /></label>
+      </div>
+
+      <div class="actions" style="margin-top: 10px;">
+        <button id="btnApplyTplToJson">应用到 JSON</button>
+        <button id="btnLoadTplFromJson">从 JSON 读取到表单</button>
+        <span class="muted" id="tplStatus"></span>
+      </div>
+    </div>
+
+    <div class="card fieldBlock" style="margin-top: 12px;">
+      <h3>2.2) 自定义测地区 API（可选，一行一个 Base URL）</h3>
+      <div class="muted">写入 `geoApi.customBaseUrls`，将<strong>优先</strong>于内置列表轮询；留空则仅用配置/内置 API。支持：ip-api.com、ipwho.is、ipapi.co、ipwhois.app、ipapi.is（程序内置已含多条兜底）。</div>
+      <textarea id="geoCustomApis" style="min-height: 100px;" placeholder="https://ip-api.com/json&#10;https://ipwho.is"></textarea>
+      <div class="actions" style="margin-top: 8px;">
+        <button id="btnGeoUrlsToJson">自定义 API → 写入 JSON</button>
+        <button id="btnGeoUrlsFromJson">从 JSON 读取到本框</button>
       </div>
     </div>
 
@@ -51,20 +230,25 @@
         <label>重试次数 <input id="retries" type="number" min="0" value="1" /></label>
         <label>重试退避(ms) <input id="retryBackoffMs" type="number" min="0" value="400" /></label>
         <label>delay timeout(ms) <input id="timeoutMs" type="number" min="1000" value="7000" /></label>
-        <button id="btnStart">开始任务</button>
+        <button id="btnStart" class="primary">开始任务</button>
         <button id="btnDiag">一键诊断</button>
-        <span id="jobStatus" class="muted"></span>
       </div>
       <div class="muted">失败原因会分类统计（timeout/auth/network/invalid_response/…）。</div>
     </div>
 
     <div class="row" style="margin-top: 12px;">
-      <div class="card">
+      <div class="card fieldBlock">
         <h3>进度 & 日志</h3>
-        <div id="progressText" class="muted"></div>
+        <div class="progressWrap">
+          <div id="progressText" class="muted"></div>
+          <div class="progressBar" aria-label="progress">
+            <div class="progressFill" id="progressFill"></div>
+            <div class="progressShine" id="progressShine"></div>
+          </div>
+        </div>
         <pre id="logs"></pre>
       </div>
-      <div class="card">
+      <div class="card fieldBlock">
         <h3>结果输出</h3>
         <div class="actions">
           <button id="btnCopy">复制结果</button>
@@ -75,7 +259,27 @@
       </div>
     </div>
 
+    <div class="card fieldBlock" style="margin-top: 12px;">
+      <h3>测速成功历史（Output.txt）</h3>
+      <div class="muted">每次任务成功会合并写入程序目录下 `Output.txt`；相同 IP:端口 保留<strong>最新</strong>一行。</div>
+      <div class="actions" style="margin-top: 8px;">
+        <button id="btnLoadOutput">刷新历史</button>
+        <button id="btnSaveOutput">保存修改到 Output.txt</button>
+      </div>
+      <textarea id="outputHistory" style="min-height: 160px; margin-top: 8px;" placeholder="（空）"></textarea>
+    </div>
+
+    <div class="card fieldBlock" style="margin-top: 12px;">
+      <h3>历史测速地图（中转城市 → 落地地区）</h3>
+      <div class="muted">底图为等距圆柱投影世界地图；根据 Output.txt 解析每行绘制示意弧线（无法匹配地名时不画线）。</div>
+      <div class="actions" style="margin-top: 8px;">
+        <button id="btnRefreshMap" type="button">刷新地图</button>
+      </div>
+      <svg id="worldMapSvg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="world map"></svg>
+      <div class="mapLegend" id="mapLegend"></div>
+    </div>
+
     <script src="/ui.js"></script>
+    </div>
   </body>
 </html>
-

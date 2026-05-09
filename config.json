@@ -1,6 +1,7 @@
 {
   "geoApi": {
-    "baseUrl": "http://ip-api.com/json",
+    "baseUrl": "https://ip-api.com/json",
+    "customBaseUrls": [],
     "fallbackBaseUrls": [
       "https://ipwho.is",
       "https://ipapi.co"
@@ -8,7 +9,7 @@
     "lang": "zh-CN",
     "minIntervalMs": 1500,
     "timeoutMs": 8000,
-    "fields": "status,message,country,regionName,city,as,query"
+    "fields": "status,message,country,regionName,city,district,as,query"
   },
   "exitIpProviders": [
     "http://icanhazip.com/",

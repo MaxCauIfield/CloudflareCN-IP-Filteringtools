@@ -2,7 +2,8 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 
 const { parseFofaToIpPorts } = require("./fofa");
-const { geoLookupBatch } = require("./geo");
+const { geoLookupBatch, geoLookupExitMerged } = require("./geo");
+const { localizeGeoLabel, localizeCityName } = require("./geoLocale");
 const { ensureMihomoBinary, startMihomo, stopMihomo } = require("./mihomo");
 const { buildMihomoConfigYaml } = require("./mihomoConfig");
 const { mihomoDelayTest, mihomoSelectGlobal } = require("./mihomoApi");
@@ -84,8 +85,12 @@ async function runPool(items, worker, maxConcurrency, onProgress) {
 async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
   const log = hooks.log || (() => {});
   const setStage = hooks.setStage || (() => {});
+  const onProgress = hooks.onProgress || (() => {});
 
+  setStage("read");
+  onProgress({ done: 0, total: 6, step: 1, stepName: "读取" });
   setStage("parse");
+  onProgress({ done: 0, total: 6, step: 2, stepName: "列出去重/筛选端口号" });
   const ipPorts = parseFofaToIpPorts(rawFofaText);
   if (ipPorts.length === 0) {
     return {
@@ -96,13 +101,26 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
   }
 
   setStage("geo_node");
+  onProgress({ done: 0, total: 6, step: 3, stepName: "查询节点信息(城市/ASN)" });
   log(`解析到去重后 IP:端口 共 ${ipPorts.length} 个，查询节点本身城市/ASN...`);
-  const nodeIpMetas = await geoLookupBatch(
-    cfg,
-    ipPorts.map((x) => x.ip)
-  );
+  const nodeIpMetas = await geoLookupBatch(cfg, ipPorts.map((x) => x.ip), {
+    phase: "geo_node",
+    onProgress: (info) => {
+      onProgress({
+        done: info.index,
+        total: info.total,
+        step: 3,
+        stepName: "查询节点信息(城市/ASN)",
+        detail: `测地区(API) 节点IP ${info.ip} (${info.index}/${info.total})${info.preview ? ` → ${info.preview}` : ""}`
+      });
+      log(
+        `Geo节点 ${info.ip} (${info.index}/${info.total})${info.preview ? ` → ${info.preview}` : ""}`
+      );
+    }
+  });
 
   setStage("mihomo_prepare");
+  onProgress({ done: 0, total: 6, step: 4, stepName: "生成配置/启动核心" });
   await ensureMihomoBinary(cfg);
 
   const yaml = buildMihomoConfigYaml(
@@ -116,6 +134,8 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
 
   try {
     setStage("delay_test");
+    // 测速阶段：progress 用 done/total 表示条目进度
+    onProgress({ done: 0, total: ipPorts.length, step: 5, stepName: "测速(连通性/延迟)" });
     log(
       `开始并发测速（timeout/失败将剔除）... maxConcurrency=${cfg.test.maxConcurrency} timeoutMs=${cfg.test.timeoutMs} retries=${cfg.test.retries}`
     );
@@ -136,7 +156,7 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
         return { ...x, ...r, proxyName };
       },
       cfg.test.maxConcurrency,
-      hooks.onProgress
+      (p) => onProgress({ ...p, step: 5, stepName: "测速(连通性/延迟)" })
     );
 
     const ok = tested.filter((t) => t.ok);
@@ -152,12 +172,15 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
     }
 
     setStage("exit_ip");
+    // 出口探测阶段：progress 用 done/total 表示节点序号进度
+    onProgress({ done: 0, total: ok.length, step: 6, stepName: "测试出口IP/最终输出" });
     log(`测速通过 ${ok.length} 个，开始逐个探测落地 IP...`);
 
     const lines = [];
     const exitFailures = new Map(); // reason
     let seq = 1;
     for (const x of ok) {
+      onProgress({ done: seq - 1, total: ok.length, step: 6, stepName: "测试出口IP/最终输出" });
       try {
         await mihomoSelectGlobal(cfg, x.proxyName);
         const exitIp = await getExitIpViaLocalProxy(cfg);
@@ -166,16 +189,37 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
           log(`落地IP失败 ${x.proxyName}（将尝试调整 exitIpProviders / 检查大陆网络对目标站点TLS重置）`);
           continue;
         }
-        const exitMeta = (await geoLookupBatch(cfg, [exitIp])).get(exitIp);
+        onProgress({
+          done: seq - 1,
+          total: ok.length,
+          step: 6,
+          stepName: "测试出口IP/最终输出",
+          detail: `测地区(API) 落地IP ${exitIp}（合并多源补全省州）…`
+        });
+        const exitMeta = await geoLookupExitMerged(cfg, exitIp);
+        onProgress({
+          done: seq - 1,
+          total: ok.length,
+          step: 6,
+          stepName: "测试出口IP/最终输出",
+          detail: `测地区(API) 落地IP ${exitIp} → ${exitMeta ? [exitMeta.city, exitMeta.regionName, exitMeta.country].filter(Boolean).join(" / ") : "(无结果)"}`
+        });
         const exitLoc = exitMeta
-          ? `${exitMeta.country || ""}${exitMeta.regionName || ""}${exitMeta.city || ""}`.trim() || "未知地区"
+          ? localizeGeoLabel(cfg, exitMeta.country, exitMeta.regionName, exitMeta.city, {
+              mode: "exit",
+              district: exitMeta.district
+            }) || "未知地区"
           : "未知地区";
 
         const nodeMeta = nodeIpMetas.get(x.ip);
-        const nodeCity = nodeMeta?.city || "未知城市";
-        const asnFull = nodeMeta?.asnFull || "未知ASN";
+        const nodeCityRaw = nodeMeta?.city || nodeMeta?.regionName || "";
+        const nodeCity = nodeCityRaw
+          ? localizeCityName(cfg, nodeCityRaw) || nodeCityRaw
+          : "未知城市";
+        /** 节点 ASN：使用查询 API 返回的 as/org 原文解析结果，不做翻译或改写 */
+        const asnFull = nodeMeta?.asnFull != null ? String(nodeMeta.asnFull) : "未知ASN";
 
-        lines.push(`${x.ip}:${x.port} #${exitLoc}${seq} ${nodeCity}中转 ${asnFull}`);
+        lines.push(`${x.ip}:${x.port}#${exitLoc}${seq} ${nodeCity}中转 ${asnFull}`);
         seq += 1;
       } catch (e) {
         const reason = classifyException(e);
@@ -186,6 +230,7 @@ async function runFullPipeline(cfg, rawFofaText, hooks = {}) {
     }
 
     setStage("done");
+    onProgress({ done: ok.length, total: ok.length, step: 6, stepName: "测试出口IP/最终输出" });
     const merged = new Map(failures);
     for (const [k, v] of exitFailures.entries()) merged.set(k, (merged.get(k) || 0) + v);
 
