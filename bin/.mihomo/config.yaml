@@ -1,0 +1,813 @@
+mixed-port: 7890
+allow-lan: false
+mode: global
+log-level: info
+external-controller: "127.0.0.1:9090"
+secret: ""
+proxies:
+  - name: "IP 103.214.172.210:443"
+    type: "trojan"
+    server: "103.214.172.210"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 38.207.190.188:443"
+    type: "trojan"
+    server: "38.207.190.188"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.160:443"
+    type: "trojan"
+    server: "103.44.244.160"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.158:443"
+    type: "trojan"
+    server: "103.44.244.158"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 121.4.89.226:2000"
+    type: "trojan"
+    server: "121.4.89.226"
+    port: 2000
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 149.104.6.107:2083"
+    type: "trojan"
+    server: "149.104.6.107"
+    port: 2083
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.242.67.19:2053"
+    type: "trojan"
+    server: "47.242.67.19"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 119.236.89.29:33890"
+    type: "trojan"
+    server: "119.236.89.29"
+    port: 33890
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 112.118.230.63:6443"
+    type: "trojan"
+    server: "112.118.230.63"
+    port: 6443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 213.159.70.65:2083"
+    type: "trojan"
+    server: "213.159.70.65"
+    port: 2083
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.162:443"
+    type: "trojan"
+    server: "103.44.244.162"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 149.88.88.88:443"
+    type: "trojan"
+    server: "149.88.88.88"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 154.83.85.220:443"
+    type: "trojan"
+    server: "154.83.85.220"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 59.127.36.203:2053"
+    type: "trojan"
+    server: "59.127.36.203"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.243.22.177:2053"
+    type: "trojan"
+    server: "47.243.22.177"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 149.88.67.104:2053"
+    type: "trojan"
+    server: "149.88.67.104"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 154.222.28.74:443"
+    type: "trojan"
+    server: "154.222.28.74"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.157:443"
+    type: "trojan"
+    server: "103.44.244.157"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 85.113.71.17:443"
+    type: "trojan"
+    server: "85.113.71.17"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 149.88.72.181:443"
+    type: "trojan"
+    server: "149.88.72.181"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.156:443"
+    type: "trojan"
+    server: "103.44.244.156"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.44.244.192:443"
+    type: "trojan"
+    server: "103.44.244.192"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 8.129.132.92:3307"
+    type: "trojan"
+    server: "8.129.132.92"
+    port: 3307
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 38.207.190.139:443"
+    type: "trojan"
+    server: "38.207.190.139"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 38.207.191.124:443"
+    type: "trojan"
+    server: "38.207.191.124"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.20.223.68:2053"
+    type: "trojan"
+    server: "103.20.223.68"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.107.135.229:10002"
+    type: "trojan"
+    server: "47.107.135.229"
+    port: 10002
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 45.125.15.7:443"
+    type: "trojan"
+    server: "45.125.15.7"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.112.17.37:3307"
+    type: "trojan"
+    server: "47.112.17.37"
+    port: 3307
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 38.207.190.183:443"
+    type: "trojan"
+    server: "38.207.190.183"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 8.210.26.248:443"
+    type: "trojan"
+    server: "8.210.26.248"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 117.30.205.234:2053"
+    type: "trojan"
+    server: "117.30.205.234"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 38.207.190.202:443"
+    type: "trojan"
+    server: "38.207.190.202"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.238.72.96:443"
+    type: "trojan"
+    server: "47.238.72.96"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.107.187.7:3310"
+    type: "trojan"
+    server: "47.107.187.7"
+    port: 3310
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 156.226.173.88:443"
+    type: "trojan"
+    server: "156.226.173.88"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 120.77.221.242:3310"
+    type: "trojan"
+    server: "120.77.221.242"
+    port: 3310
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 45.39.198.12:55555"
+    type: "trojan"
+    server: "45.39.198.12"
+    port: 55555
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 222.167.202.5:7443"
+    type: "trojan"
+    server: "222.167.202.5"
+    port: 7443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 103.30.41.169:8444"
+    type: "trojan"
+    server: "103.30.41.169"
+    port: 8444
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 112.74.57.8:3372"
+    type: "trojan"
+    server: "112.74.57.8"
+    port: 3372
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 35.241.105.38:55555"
+    type: "trojan"
+    server: "35.241.105.38"
+    port: 55555
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 120.232.251.135:2053"
+    type: "trojan"
+    server: "120.232.251.135"
+    port: 2053
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.106.202.52:3372"
+    type: "trojan"
+    server: "47.106.202.52"
+    port: 3372
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 146.70.79.56:2083"
+    type: "trojan"
+    server: "146.70.79.56"
+    port: 2083
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 222.167.202.18:7443"
+    type: "trojan"
+    server: "222.167.202.18"
+    port: 7443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 222.167.202.20:7443"
+    type: "trojan"
+    server: "222.167.202.20"
+    port: 7443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 222.167.202.11:7443"
+    type: "trojan"
+    server: "222.167.202.11"
+    port: 7443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 47.83.21.249:443"
+    type: "trojan"
+    server: "47.83.21.249"
+    port: 443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+  - name: "IP 222.167.202.23:7443"
+    type: "trojan"
+    server: "222.167.202.23"
+    port: 7443
+    password: "e5fc2395-9a98-4be9-8af2-8e0dfd9df55b"
+    network: "ws"
+    sni: "alde1.pages.dev"
+    skip-cert-verify: true
+    ech-opts:
+      enable: true
+      query-server-name: "cloudflare-ech.com"
+    ws-opts:
+      path: "/library?ed=2560"
+      headers:
+        Host: "alde1.pages.dev"
+proxy-groups:
+  - name: "GLOBAL"
+    type: select
+    proxies:
+      - "IP 103.214.172.210:443"
+      - "IP 38.207.190.188:443"
+      - "IP 103.44.244.160:443"
+      - "IP 103.44.244.158:443"
+      - "IP 121.4.89.226:2000"
+      - "IP 149.104.6.107:2083"
+      - "IP 47.242.67.19:2053"
+      - "IP 119.236.89.29:33890"
+      - "IP 112.118.230.63:6443"
+      - "IP 213.159.70.65:2083"
+      - "IP 103.44.244.162:443"
+      - "IP 149.88.88.88:443"
+      - "IP 154.83.85.220:443"
+      - "IP 59.127.36.203:2053"
+      - "IP 47.243.22.177:2053"
+      - "IP 149.88.67.104:2053"
+      - "IP 154.222.28.74:443"
+      - "IP 103.44.244.157:443"
+      - "IP 85.113.71.17:443"
+      - "IP 149.88.72.181:443"
+      - "IP 103.44.244.156:443"
+      - "IP 103.44.244.192:443"
+      - "IP 8.129.132.92:3307"
+      - "IP 38.207.190.139:443"
+      - "IP 38.207.191.124:443"
+      - "IP 103.20.223.68:2053"
+      - "IP 47.107.135.229:10002"
+      - "IP 45.125.15.7:443"
+      - "IP 47.112.17.37:3307"
+      - "IP 38.207.190.183:443"
+      - "IP 8.210.26.248:443"
+      - "IP 117.30.205.234:2053"
+      - "IP 38.207.190.202:443"
+      - "IP 47.238.72.96:443"
+      - "IP 47.107.187.7:3310"
+      - "IP 156.226.173.88:443"
+      - "IP 120.77.221.242:3310"
+      - "IP 45.39.198.12:55555"
+      - "IP 222.167.202.5:7443"
+      - "IP 103.30.41.169:8444"
+      - "IP 112.74.57.8:3372"
+      - "IP 35.241.105.38:55555"
+      - "IP 120.232.251.135:2053"
+      - "IP 47.106.202.52:3372"
+      - "IP 146.70.79.56:2083"
+      - "IP 222.167.202.18:7443"
+      - "IP 222.167.202.20:7443"
+      - "IP 222.167.202.11:7443"
+      - "IP 47.83.21.249:443"
+      - "IP 222.167.202.23:7443"
+rules:
+  - MATCH,GLOBAL
