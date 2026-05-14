@@ -1,4 +1,3 @@
-为CloudFlareCDN设计的网络路由跟踪工具，基于Node.js开发
 # Cloudflare CDN Route traceroute
 
 Cloudflare CDN Route traceroute 是一个专为Cloudflare CDN 网络设计的智能路由跟踪，测绘与分析工具。
