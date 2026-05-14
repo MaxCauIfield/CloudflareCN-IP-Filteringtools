@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IP → Mihomo 节点测速筛选</title>
+    <title>Cloudflare-CDN-Route-traceroute</title>
     <style>
       :root { color-scheme: light dark; }
       *, *::before, *::after { box-sizing: border-box; }
@@ -158,8 +158,8 @@
     <div class="container">
       <div class="topbar">
         <div>
-          <h2>IP → 节点测速筛选（WebUI）</h2>
-          <div class="muted">粘贴 FOFA → 去重提取 IP:端口 → 并发测速剔除 timeout → 探测落地 IP → 输出结果。</div>
+          <h2>Cloudflare-CDN-Route-traceroute（WebUI）</h2>
+          <div class="muted">粘贴 FOFA → 去重提取 IP:端口 → 并发测速剔除 timeout → 探测出站 IP → 输出结果。</div>
         </div>
         <div class="badge">
           <span class="pill" id="jobStatus"></span>
@@ -186,7 +186,7 @@
     </div>
 
     <div class="card fieldBlock" style="margin-top: 12px;">
-      <h3>2.1) 节点订阅规则（可视化编辑：nodeTemplate）</h3>
+      <h3>2.1) 访问控制规则（可视化编辑：nodeTemplate）</h3>
       <div class="muted">这里改动会同步写入 `config.json` 的 `nodeTemplate`。如果你需要更高级的规则，仍可直接编辑上面的 JSON。</div>
       <div class="kv" style="margin-top: 10px;">
         <label>类型 <input id="tpl_type" type="text" placeholder="trojan" /></label>
