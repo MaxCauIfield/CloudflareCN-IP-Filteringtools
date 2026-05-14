@@ -2,7 +2,9 @@
 
 Cloudflare CDN Route Traceroute is an intelligent routing trace, mapping, and analysis tool designed specifically for the Cloudflare CDN network.
 
-Unlike traditional "IP optimization" tools—which merely test for latency or bandwidth—this tool focuses more closely on the actual path behavior of the Cloudflare Anycast network. ## ✨ Project Features:
+Unlike traditional "IP optimization" tools—which merely test for latency or bandwidth—this tool focuses more closely on the actual path behavior of the Cloudflare Anycast network. 
+
+## ✨ Project Features:
 
 - 🌍 **Intelligent Route Analysis**: Identifies and filters out invalid CDN load-balancing nodes; clearly labels CDN ingress (user-side) and CDN egress (origin-side) points; and provides ASN and carrier information (note: some CDN nodes in specific regions are operated by partners, not directly by Cloudflare).
 
