@@ -1,95 +1,93 @@
-# Cloudflare CDN Route traceroute
+# Cloudflare CDN Route Traceroute
 
-Cloudflare CDN Route traceroute 是一个专为Cloudflare CDN 网络设计的智能路由跟踪，测绘与分析工具。
+Cloudflare CDN Route Traceroute is an intelligent routing trace, mapping, and analysis tool designed specifically for the Cloudflare CDN network.
 
-不同于传统的“优选IP”工具，仅测试延迟或带宽，它更关注 CloudFlare Anycast 网络的真实路径行为。
+Unlike traditional "IP optimization" tools—which merely test for latency or bandwidth—this tool focuses more closely on the actual path behavior of the Cloudflare Anycast network. ## ✨ Project Features:
 
-## ✨ 项目特色：
+- 🌍 **Intelligent Route Analysis**: Identifies and filters out invalid CDN load-balancing nodes; clearly labels CDN ingress (user-side) and CDN egress (origin-side) points; and provides ASN and carrier information (note: some CDN nodes in specific regions are operated by partners, not directly by Cloudflare).
 
-- 🌍 **智能路由分析**：去除无效CDN负载服务器节点，标记CDN入站（用户侧），CDN出站（站长侧），ASN与所属运营商信息（CF部分地区的CDN节点为合作节点，非CF运营）
+- ⚙️ **Flexible Access Control**: Leverages access control rules based on the headless **Mihomo** core. Highly flexible and configurable, this rule-based system allows webmasters to fully simulate and analyze user access environments—as well as attacker environments—enabling the establishment of a comprehensive contingency framework against DDoS and CC attacks.
 
-- ⚙️ **灵活访问控制**：基于无头 **Mihomo** 核心的访问控制规则，灵活可配置，基于规则，站长可充分模拟分析用户访问环境/攻击者环境，搭建完善的反DDOS/CC攻击应急预案体系
+- 📥 **Zero Trust Network Design**: Built upon a Zero Trust Network architecture, featuring built-in ECH (Encrypted Client Hello) access control rules. It encrypts and analyzes server SNI data, ensuring that even if a webmaster's home network is hijacked or subjected to a Man-in-the-Middle (MITM) attack, attackers cannot obtain any valid "optimal route" information—thereby indirectly preventing targeted attacks against the origin server.
 
-- 📥 **零信任网设计**：基于零信任网络设计，内置ECH访问控制规则，加密分析服务器SNI，即使站长的家庭网络被劫持并MITM网络设备，也无法获得任何有效的优选信息，间接避免攻击者对源站服务器发起针对性攻击
+- 📍 **Load-Balanced Queries**: Features intelligent load-balancing for queries, allowing users to add multiple IP lookup APIs. This ensures that the tool remains fully functional and capable of retrieving information even if a single API fails. Includes both PING and TCP latency testing, with query progress displayed in real-time for a highly visualized user experience.
 
-- 📍**查询负载均衡**：智能负载均衡查询，用户可添加多个IP查询API，且不会因单个API失效造成工具无法正常查询信息，PING+TCP测速，查询进度实时展示，可视化程度高
+- 🗺️ **Comprehensive Mapping Table**: Includes a built-in mapping table covering over 240 countries and regions based on the ISO 3166-1 standard. Offers numerous configurable parameters, allows for online previews of query results, and intelligently saves historical data from multiple sessions. Additionally, it automatically generates a visual map illustrating the routing hops taken by CDN nodes.
 
--  🗺️ **完整映射表** ：内置 ISO 3166-1 标准下 240+ 国家/地区映射表，多项可配置参数，在线预览查询结果，并智能保存多次内容，地图自动绘制CDN节点路由跳跃情况
+## 📊 Technical Details:
 
-## 📊 技术细节：
+The ECH server utilizes `cloudflare-ech.com`. For detailed information, please refer to:
+[Encrypted Client Hello - The Last Piece of the Privacy Puzzle - The Cloudflare Blog](https://blog.cloudflare.com/en-us/announcing-encrypted-client-hello/)
 
-ECH服务器使用`cloudflare-ech.com`，详细介绍可参阅：
-[Encrypted Client Hello - 隐私的最后一块拼图 - The CloudFlare Blog](https://blog.cloudflare.com/en-us/announcing-encrypted-client-hello/)
+For real-time routing status information regarding Cloudflare services, please refer to:
+[Routing Service System Status - Cloudflare](https://www.cloudflarestatus.com/)
 
-有关于CloudFlare实时状态路由信息，请参阅：
-[路由服务的系统状态 - CloudFlare](https://www.cloudflarestatus.com/)
+## 🚀 Quick Start:
 
-## 🚀 快速开始：
+#### Prerequisites
 
-#### 前置条件
+- Node.js 18+ (Versions 20 or 22 are recommended).
 
-- Node.js 18+ (建议20/22）
+- An executable `mihomo` core binary for Linux (this tool supports automatic downloading from GitHub Releases; if your network prevents a successful automatic download, please download it manually and configure the `mihomo.binPath` setting).
+- Data Sources: FOFA or GitHub Search
 
-- Linux 下可执行的 `mihomo` 核心（本工具支持从 GitHub Releases 自动下载； 若你的网络无法正常下载，请手动下载并配置 `mihomo.binPath`）
-- 数据源：FOFA 或 Github Search
-
-#### 运行（WebUI）
+#### Running (WebUI)
 
 ```
 npm run web
 ```
 
-打开浏览器，访问： http://127.0.0.1:8787/
+Open your browser and visit: http://127.0.0.1:8787/
 
-#### 高级CLI配置（开发人员使用）
+#### Advanced CLI Configuration (For Developers)
 
-复制一份配置文件：
+Make a copy of the configuration file:
 
 ```shell
 cp config.example.json config.json
 ```
 
-如需手动指定 mihomo：
+If you need to manually specify the `mihomo` executable:
 
-- `config.json` 里把 `mihomo.binPath` 指到可执行文件
-- 或使用环境变量 `MIHOMO_BIN=/path/to/mihomo`
+- Set the `mihomo.binPath` value in `config.json` to point to the executable file.
+- Alternatively, use the environment variable `MIHOMO_BIN=/path/to/mihomo`.
 
-#### 运行（推荐：stdin 直接粘贴 FOFA）
+#### Running (Recommended: Paste FOFA Data via stdin)
 
 ```shell
 node bin/ip-clash-speedtool.js --stdin
 ```
 
-然后把 FOFA 复制的表格内容粘贴进终端，最后按 `Ctrl+D` 结束输入。
+Then, paste the table content copied from FOFA directly into your terminal, and finally press `Ctrl+D` to finish input.
 
-#### 运行（读取文件）
+#### Running (Read from File)
 
 ```shell
 node bin/ip-clash-speedtool.js --input ./fofa.txt
 ```
 
-#### 输出格式
+#### Output Format
 
 ```
-IP:端口 #出站国家地区+序号+空格+入站节点城市+中转+空格+ASN全称
+IP:Port #Outbound Country/Region + Index + Space + Inbound Node City + Transit + Space + Full ASN Name
 ```
 
 
-## ⚠️问题：
+## ⚠️ Issues:
 
-- 映射表不完整，某些地区可能无法正常翻译显示，如有需要请自行添加映射字典。
-- Geo/ASN API 默认使用 `ip-api.com`（GET 参数传递），免费接口存在速率限制，因此实现里做了 `minIntervalMs` 间隔控制。
-- Mihomo REST API 用于：
-    - `/proxies/{name}/delay` 做CDN节点连通性/延迟测试
-    - `/proxies/GLOBAL` 切换当前使用的CDN负载均衡节点
-- CDN出站 IP 通过本地混合端口（ `mixed-port`，默认 `7890`）作为代理，请求 `ipify` 获取。
+- The mapping table is incomplete; some regions may not be translated or displayed correctly. If necessary, please add the required entries to the mapping dictionary yourself.
+- The Geo/ASN API defaults to using `ip-api.com` (via GET parameters). Since this free API endpoint is subject to rate limits, the implementation includes a `minIntervalMs` control to manage request intervals.
+- The Mihomo REST API is used for the following purposes:
+- `/proxies/{name}/delay`: To perform connectivity and latency tests on CDN nodes.
+- `/proxies/GLOBAL`: To switch the currently active CDN load-balancing node.
+- The CDN outbound IP address is retrieved by routing a request to `ipify` through the local mixed-port (`mixed-port`, default: `7890`) acting as a proxy.
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-以下开源项目为本项目提供了支持
+The following open-source projects provided support for this project:
 
 Geolocation API: [ProxyNova](https://api.proxynova.com/)
 
-## 📄 许可证
+## 📄 License
 
 GPL-3.0 license @ 2026
